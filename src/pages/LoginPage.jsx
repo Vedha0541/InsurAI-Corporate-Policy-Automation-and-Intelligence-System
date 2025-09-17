@@ -3,9 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import FloatingInput from "../components/FloatingInput";
 
 const LoginPage = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
-  const navigate = useNavigate();
+  const [statusMessage, setStatusMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -16,40 +18,63 @@ const LoginPage = () => {
 
   const validate = () => {
     const newErrors = {};
-    if (!emailRegex.test(form.email)) {
+    if (!form.email) {
+      newErrors.email = "Email is required";
+    } else if (!emailRegex.test(form.email)) {
       newErrors.email = "Please enter a valid email address";
     }
-    if (!form.password) {
-      newErrors.password = "Password is required";
-    }
+    if (!form.password) newErrors.password = "Password is required";
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setStatusMessage("");
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-    // Simulate successful login (replace with API call)
-    navigate("/dashboard");
+
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email, password: form.password }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem("insuraiUser", JSON.stringify(data));
+        navigate("/dashboard");
+      } else {
+        const err = await res.json().catch(() => ({ message: "Login failed" }));
+        setStatusMessage(err.message || "Invalid email or password");
+      }
+    } catch (error) {
+      setStatusMessage("⚠️ Server not responding. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
-      <div className="text-center mb-6">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-green-50 p-4">
+      {/* Header */}
+      <div className="text-center mb-6 animate-fade-in">
         <h2 className="text-4xl font-extrabold text-gray-800 tracking-tight leading-tight whitespace-normal">
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-600">
-            Good to See You Again!
-          </span>{" "}
-          Sign In to Continue...
+            Good to See you Again!
+          </span>
         </h2>
         <p className="text-base text-gray-600 mt-2">
-          Access your InsurAI account
+          Sign in to access your InsurAI account
         </p>
       </div>
-      <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full border border-gray-200 transform transition-all duration-300 hover:scale-105">
+
+      {/* Card */}
+      <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full border border-gray-100 transform transition-all duration-300 hover:scale-[1.02]">
         <form onSubmit={handleSubmit} noValidate>
           <FloatingInput
             id="email"
@@ -72,20 +97,36 @@ const LoginPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-green-500 to-blue-600 text-white font-semibold py-3 rounded-lg shadow-lg hover:from-green-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105"
+            disabled={loading}
+            className="w-full flex items-center justify-center bg-gradient-to-r from-green-500 to-blue-600 text-white font-semibold py-3 rounded-lg shadow-lg hover:from-green-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            Log In
+            {loading ? (
+              <span className="loader border-2 border-t-transparent border-white rounded-full w-5 h-5 mr-2 animate-spin"></span>
+            ) : null}
+            {loading ? "Logging in..." : "Log In"}
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-gray-600">
-          Don't have an account?{" "}
-          <Link to="/signup" className="text-blue-600 hover:underline">
+        {/* Status Message */}
+        {statusMessage && (
+          <p className="mt-4 text-center text-sm text-red-600 font-medium animate-shake">
+            {statusMessage}
+          </p>
+        )}
+
+        {/* Links */}
+        <p className="mt-6 text-center text-sm text-gray-600">
+          Don’t have an account?{" "}
+          <Link
+            to="/signup"
+            className="text-blue-600 font-medium hover:underline"
+          >
             Sign up
           </Link>
-          {" | "}
+        </p>
+        <p className="mt-2 text-center text-sm text-gray-600">
           <Link to="/" className="text-blue-600 hover:underline">
-            Home
+            ← Back to Home
           </Link>
         </p>
       </div>
