@@ -46,16 +46,24 @@ Welcome to Home Page 😊
 Dark Theme Toggle used Hooks
 
 ---
-![Register](Images/Registration.png)
+![Register](Images/New_Registration_Page.png)
 New Account Creation👪
 
 ---
-![Login](Images/Login.png)
+![Login](Images/Login_Page.png)
 Login Page 🧍🏻
 
 ---
-![Policies](Images/Policies.png)
+![Policies](Images/Policies_page.png)
 Policies Page Upload,read..📃
+
+---
+![Application Form](Images/Policy_Application.png)
+Application Form For Policies...
+
+---
+![Admin Dashboard](Images/Admin_Dashboard.png)
+System Administrator Dashboard..💻
 
 ---
 
