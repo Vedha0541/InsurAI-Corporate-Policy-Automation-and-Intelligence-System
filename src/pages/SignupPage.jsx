@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import FloatingInput from "../components/FloatingInput";
 import Sidebar from "../components/Sidebar";
 
 const SignupPage = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -13,11 +14,11 @@ const SignupPage = () => {
     confirmPassword: "",
     role: "user",
   });
-
   const [errors, setErrors] = useState({});
+  const [statusMessage, setStatusMessage] = useState("");
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const phoneRegex = /^\+?[0-9]{7,15}$/; // basic phone validation
+  const phoneRegex = /^\+?[0-9]{7,15}$/;
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -26,43 +27,59 @@ const SignupPage = () => {
 
   const validate = () => {
     const newErrors = {};
-
-    if (!form.firstName.trim()) {
-      newErrors.firstName = "First name is required";
-    }
-    if (!form.lastName.trim()) {
-      newErrors.lastName = "Last name is required";
-    }
-    if (!phoneRegex.test(form.phone)) {
+    if (!form.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!form.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!phoneRegex.test(form.phone))
       newErrors.phone = "Please enter a valid phone number";
-    }
-    if (!emailRegex.test(form.email)) {
-      newErrors.email = "Please enter a valid email address";
-    }
-    if (!form.password) {
-      newErrors.password = "Password is required";
-    }
-    if (form.password !== form.confirmPassword) {
+    if (!emailRegex.test(form.email))
+      newErrors.email = "Please enter a valid email";
+    if (!form.password) newErrors.password = "Password is required";
+    if (form.password !== form.confirmPassword)
       newErrors.confirmPassword = "Passwords do not match";
-    }
-
     return newErrors;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
-    // Simulate successful signup (replace with API call)
-    document.getElementById(
-      "status-message"
-    ).innerText = `Signed up as ${form.role} with email: ${form.email}`;
-    setTimeout(() => {
-      document.getElementById("status-message").innerText = "";
-    }, 3000);
+
+    // ✅ Only send fields your backend expects
+    const payload = {
+      firstName: form.firstName,
+      lastName: form.lastName,
+      phone: form.phone,
+      email: form.email,
+      password: form.password,
+      role: form.role,
+    };
+
+    try {
+      const res = await fetch("http://localhost:8080/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setStatusMessage(data.message || "Signup successful");
+        setTimeout(() => {
+          setStatusMessage("");
+          navigate("/login");
+        }, 1500);
+      } else {
+        const err = await res
+          .json()
+          .catch(() => ({ message: "Signup failed" }));
+        setStatusMessage(err.message || "Signup failed");
+      }
+    } catch (error) {
+      setStatusMessage("Server error: " + error.message);
+    }
   };
 
   return (
@@ -96,6 +113,7 @@ const SignupPage = () => {
                 <option value="admin">System Administrator</option>
               </select>
             </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <FloatingInput
                 id="firstName"
@@ -114,9 +132,10 @@ const SignupPage = () => {
                 error={errors.lastName}
               />
             </div>
+
             <FloatingInput
               id="email"
-              label="Email Address"
+              label="Email"
               name="email"
               type="email"
               value={form.email}
@@ -125,7 +144,7 @@ const SignupPage = () => {
             />
             <FloatingInput
               id="phone"
-              label="Phone Number"
+              label="Phone"
               name="phone"
               type="tel"
               value={form.phone}
@@ -159,10 +178,11 @@ const SignupPage = () => {
             </button>
           </form>
 
-          <p
-            id="status-message"
-            className="mt-4 text-center text-sm text-green-600 font-medium"
-          ></p>
+          {statusMessage && (
+            <p className="mt-4 text-center text-sm text-green-600 font-medium">
+              {statusMessage}
+            </p>
+          )}
 
           <p className="mt-4 text-center text-sm text-gray-600">
             Already have an account?{" "}
