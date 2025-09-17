@@ -28,13 +28,16 @@ InsurAI is a **React + Node.js + MySQL-based platform** that helps organizations
 
 **Backend**
 
-* Node.js + Express
+* SpringBoot
 * JWT for authentication
 * REST API architecture
 
 **Database**
 
 * MySQL (for structured data)
+
+**API Testing**
+* Postman
 
 ---
 ## Sample Results
