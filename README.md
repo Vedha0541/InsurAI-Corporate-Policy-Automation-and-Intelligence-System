@@ -41,7 +41,7 @@ InsurAI is a **React + Node.js + MySQL-based platform** that helps organizations
 
 ---
 ## Sample Results
-![Home](Images/Home_page.png)
+![Home](Images/HomePage.png)
 Welcome to Home Page 😊
 
 ---
@@ -65,8 +65,12 @@ Policies Page Upload,read..📃
 Application Form For Policies...
 
 ---
-![Admin Dashboard](Images/Admin_Dashboard.png)
+![Admin Dashboard](Images/AdminDashboard.png)
 System Administrator Dashboard..💻
+
+---
+![Admin Profile](Images/AdminProfile.png)
+Analysis in Admin Profile
 
 ---
 
