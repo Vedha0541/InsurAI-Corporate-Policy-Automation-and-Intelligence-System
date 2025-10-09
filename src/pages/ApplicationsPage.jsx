@@ -2,39 +2,51 @@ import React, { useEffect, useState, useCallback } from "react";
 import Sidebar from "../components/Sidebar";
 
 const ApplicationsPage = ({ refreshTrigger }) => {
-  const userId = 1; // Replace with actual logged-in user ID
+  // Get logged-in user info
+  const loggedInName = localStorage.getItem("username") || "Sathwik";
+  const userId = Number(localStorage.getItem("userId")) || 0;
+
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Function to fetch user's applications
+  // Format numbers as INR
+  const formatINR = (amount) => {
+    if (amount === null || amount === undefined) return "N/A";
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
+  // Fetch user applications
   const fetchApplications = useCallback(() => {
     setLoading(true);
     fetch(`http://localhost:8080/api/policies/user/${userId}`)
       .then((res) => res.json())
       .then((data) => {
-        // Ensure applications is always an array
-        if (Array.isArray(data)) {
-          setApplications(data);
-        } else if (data?.policies && Array.isArray(data.policies)) {
-          setApplications(data.policies);
-        } else {
-          setApplications([]);
-        }
+        // Ensure data is an array
+        if (!Array.isArray(data)) data = data?.policies || [];
+
+        // Filter by logged-in user's username
+        const userApplications = data.filter(
+          (app) => app.username === loggedInName
+        );
+
+        setApplications(userApplications);
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Error fetching applications:", err);
         setApplications([]);
         setLoading(false);
       });
-  }, [userId]);
+  }, [userId, loggedInName]);
 
-  // Initial fetch
   useEffect(() => {
     fetchApplications();
   }, [fetchApplications]);
 
-  // Re-fetch when a new application is submitted (live update)
   useEffect(() => {
     if (refreshTrigger) fetchApplications();
   }, [refreshTrigger, fetchApplications]);
@@ -51,33 +63,33 @@ const ApplicationsPage = ({ refreshTrigger }) => {
           <p>No applied policies found.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {applications.map((policy) => (
+            {applications.map((app) => (
               <div
-                key={policy.id}
+                key={app.id}
                 className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition"
               >
-                <h2 className="text-xl font-semibold mb-2">{policy.name}</h2>
-                <p>
-                  <strong>Type:</strong> {policy.type}
+                <p className="text-gray-700 font-semibold mb-2">
+                  {app.username || app.name || "Unnamed User"}
                 </p>
-                <p>
-                  <strong>Start Date:</strong> {policy.startDate}
+                <p className="text-gray-600 mt-1">Type: {app.type || "N/A"}</p>
+                <p className="text-gray-600 mt-1">
+                  Premium: {formatINR(app.premiumAmount)}
                 </p>
-                <p>
-                  <strong>End Date:</strong> {policy.endDate}
+                <p className="text-gray-600 mt-1">
+                  Coverage: {formatINR(app.coverage)}
                 </p>
-                <p>
-                  <strong>Status:</strong>{" "}
+                <p className="text-gray-500 mt-1 text-sm">
+                  Status:{" "}
                   <span
-                    className={`${
-                      policy.status === "APPROVED"
+                    className={`font-semibold ${
+                      app.status === "APPROVED"
                         ? "text-green-600"
-                        : policy.status === "PENDING"
+                        : app.status === "PENDING"
                         ? "text-yellow-600"
                         : "text-red-600"
-                    } font-semibold`}
+                    }`}
                   >
-                    {policy.status}
+                    {app.status || "PENDING"}
                   </span>
                 </p>
               </div>
