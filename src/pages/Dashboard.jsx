@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaUserCircle, FaUser, FaChartBar, FaCog } from "react-icons/fa";
 import Sidebar from "../components/Sidebar";
+import ChatWidget from "../components/ChatWidget"; // NEW: Chat widget
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -28,14 +29,15 @@ const Dashboard = () => {
         .then((data) => {
           const mappedApps = (data.applications || []).map((app) => ({
             id: app.id,
-            name: app.name || "-",
+            name: app.username || app.name || "-", // ✅ use username
             age: app.age || "-",
             gender: app.gender || "-",
             type: app.type || "-",
-            premium: app.premium || "-",
-            coverage: app.coverage || "-",
-            status: app.status || "PENDING",
+            premium: app.premiumAmount || "-", // ✅ correct key
+            coverage: app.coverage || "-", // ✅ correct key
+            status: app.status || "APPROVED", // ✅ default Approved
           }));
+
 
           setAdminStats({
             totalUsers: data.totalUsers || 0,
@@ -44,7 +46,6 @@ const Dashboard = () => {
           });
           setLoading(false);
         })
-
         .catch((err) => {
           console.error(err);
           setLoading(false);
@@ -58,7 +59,7 @@ const Dashboard = () => {
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      <Sidebar currentUser={user} />
       <main className="flex-1 ml-64 bg-gray-50 p-6">
         {/* Navbar */}
         <header className="flex justify-between items-center bg-white shadow px-6 py-4 mb-6">
@@ -165,7 +166,11 @@ const Dashboard = () => {
               Manage your insurance tasks and policies here.
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="bg-white rounded-xl shadow p-6 flex items-center space-x-4 hover:shadow-lg transition">
+              {/* Profile Card */}
+              <div
+                className="bg-white rounded-xl shadow p-6 flex items-center space-x-4 hover:shadow-lg transition cursor-pointer"
+                onClick={() => navigate("/profile")}
+              >
                 <FaUser className="text-blue-600 text-3xl" />
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800">
@@ -176,7 +181,12 @@ const Dashboard = () => {
                   </p>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow p-6 flex items-center space-x-4 hover:shadow-lg transition">
+
+              {/* Analytics Card */}
+              <div
+                className="bg-white rounded-xl shadow p-6 flex items-center space-x-4 hover:shadow-lg transition cursor-pointer"
+                onClick={() => navigate("/analytics")}
+              >
                 <FaChartBar className="text-green-600 text-3xl" />
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800">
@@ -187,7 +197,12 @@ const Dashboard = () => {
                   </p>
                 </div>
               </div>
-              <div className="bg-white rounded-xl shadow p-6 flex items-center space-x-4 hover:shadow-lg transition">
+
+              {/* Settings Card */}
+              <div
+                className="bg-white rounded-xl shadow p-6 flex items-center space-x-4 hover:shadow-lg transition cursor-pointer"
+                onClick={() => navigate("/settings")}
+              >
                 <FaCog className="text-purple-600 text-3xl" />
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800">
@@ -202,6 +217,9 @@ const Dashboard = () => {
           </>
         )}
       </main>
+
+      {/* Chat Widget */}
+      <ChatWidget />
     </div>
   );
 };
