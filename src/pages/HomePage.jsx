@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import heroImage from "../assets/hero-insurance.jpg"; // 👈 keep in src/assets/
 
 const HomePage = () => {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -101,46 +102,58 @@ const HomePage = () => {
         </button>
       </nav>
 
-      {/* Hero Section */}
-      <div className="text-center pt-20 pb-10">
-        <h1
-          className={`text-5xl font-extrabold mb-4 ${
-            isDarkMode ? "text-[#E2E8F0]" : "text-gray-800"
-          }`}
-        >
-          Automate & Verify Policies with AI
-        </h1>
-        <p
-          className={`text-lg mb-6 ${
-            isDarkMode ? "text-[#A0AEC0]" : "text-gray-600"
-          }`}
-        >
-          InsurAI helps you manage corporate policies with real-time automation,
-          expert validation, and AI-powered verification.
-        </p>
-        <div className="space-x-4">
-          <Link to="/signup">
-            <button
-              className={`${
-                isDarkMode
-                  ? "bg-[#4C51BF] text-white hover:bg-[#5A67D8]"
-                  : "bg-purple-600 text-white hover:bg-purple-700"
-              } py-2 px-4 rounded-lg`}
-            >
-              Get Started
-            </button>
-          </Link>
-          <Link to="/login">
-            <button
-              className={`${
-                isDarkMode
-                  ? "bg-[#2D3748] text-[#E2E8F0] hover:bg-[#4A5568]"
-                  : "bg-gray-300 text-gray-800 hover:bg-gray-400"
-              } py-2 px-4 rounded-lg`}
-            >
-              Login
-            </button>
-          </Link>
+      {/* Hero Section with Background Image */}
+      <div
+        className="relative w-full bg-cover bg-center"
+        style={{
+          backgroundImage: `url(${heroImage})`,
+          height: "850px", // 👈 adjust the height as needed
+        }}
+      >
+        {/* Overlay for transparency */}
+        <div className="absolute inset-0 bg-white/70 dark:bg-black/60"></div>
+
+        {/* Hero Content */}
+        <div className="relative z-10 text-center flex flex-col items-center justify-center h-full px-6">
+          <h1
+            className={`text-5xl font-extrabold mb-4 ${
+              isDarkMode ? "text-[#E2E8F0]" : "text-gray-800"
+            }`}
+          >
+            Automate & Verify Policies with AI
+          </h1>
+          <p
+            className={`text-lg mb-6 max-w-2xl ${
+              isDarkMode ? "text-[#A0AEC0]" : "text-gray-600"
+            }`}
+          >
+            InsurAI helps you manage corporate policies with real-time
+            automation, expert validation, and AI-powered verification.
+          </p>
+          <div className="space-x-4">
+            <Link to="/signup">
+              <button
+                className={`${
+                  isDarkMode
+                    ? "bg-[#4C51BF] text-white hover:bg-[#5A67D8]"
+                    : "bg-purple-600 text-white hover:bg-purple-700"
+                } py-2 px-4 rounded-lg`}
+              >
+                Get Started
+              </button>
+            </Link>
+            <Link to="/login">
+              <button
+                className={`${
+                  isDarkMode
+                    ? "bg-[#2D3748] text-[#E2E8F0] hover:bg-[#4A5568]"
+                    : "bg-gray-300 text-gray-800 hover:bg-gray-400"
+                } py-2 px-4 rounded-lg`}
+              >
+                Login
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
 
